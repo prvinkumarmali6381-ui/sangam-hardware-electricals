@@ -10,7 +10,7 @@ type Product = {
   Category: string;
 };
 
-// Clean Image Converter
+// Ultra-Robust Mobile Multi-Proxy Image Converter
 const getFormattedImageUrl = (rawUrl: string) => {
   if (!rawUrl || rawUrl.trim() === "") {
     return "https://via.placeholder.com/400x300?text=Sangam+Hardware";
@@ -18,6 +18,7 @@ const getFormattedImageUrl = (rawUrl: string) => {
 
   const cleanUrl = rawUrl.trim().replace(/\r/g, "");
 
+  // 1. Google Drive direct stream URL format
   if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("lh3.googleusercontent.com")) {
     const match =
       cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -26,6 +27,11 @@ const getFormattedImageUrl = (rawUrl: string) => {
       return `https://lh3.googleusercontent.com/d/${match[1]}=w800`;
     }
     return cleanUrl;
+  }
+
+  // 2. GlideApp internal links routed through proxy with fallback
+  if (cleanUrl.includes("glide") || cleanUrl.includes("glideos.app")) {
+    return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=600&output=jpg`;
   }
 
   return cleanUrl;
@@ -65,7 +71,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // Safe Google TSV Sheet Fetch
+  // Safe TSV Fetch Logic
   useEffect(() => {
     const parseTSVData = (text: string) => {
       const rows = text.replace(/\r/g, "").trim().split("\n");
@@ -80,25 +86,25 @@ export default function Home() {
       });
     };
 
-    const tsvUrl =
+    const sheetUrl =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCfvoj3QhqSZpO5odJ5ipsBNoU0Uh9PkiBBRvtUlFNzRbrXBnMsoxAdQBCDgx93xZFzXNiIg4jY_bH/pub?gid=0&single=true&output=tsv";
 
-    fetch(tsvUrl)
+    fetch(sheetUrl)
       .then((res) => {
-        if (!res.ok) throw new Error("TSV Fetch Failed");
+        if (!res.ok) throw new Error("Direct TSV Fetch Failed");
         return res.text();
       })
       .then((text) => setProducts(parseTSVData(text)))
       .catch((err) => {
-        console.warn("Direct fetch blocked, trying proxy fallback:", err);
-        fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(tsvUrl)}`)
+        console.warn("Direct TSV fetch blocked, fallback to proxy:", err);
+        fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sheetUrl)}`)
           .then((res) => res.text())
           .then((text) => setProducts(parseTSVData(text)))
           .catch((proxyErr) => console.error("Proxy fetch error:", proxyErr));
       });
   }, []);
 
-  // Fetch Drive Folder Gallery Photos via Apps Script Web App
+  // Fetch Gallery Data from Google Apps Script
   useEffect(() => {
     fetch(
       "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
@@ -287,12 +293,19 @@ export default function Home() {
                       <img
                         src={displayImageUrl}
                         alt={item.Product}
+                        loading="lazy"
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
                         onClick={() => setSelectedImage(displayImageUrl)}
                         onError={(e: any) => {
                           e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                          // If proxy fails, try direct raw URL or fallback image
+                          if (item.Image && e.target.src !== item.Image) {
+                            e.target.src = item.Image;
+                          } else {
+                            e.target.src =
+                              "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                          }
                         }}
                       />
                     </div>
@@ -350,7 +363,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GALLERY SECTION (DRIVE FOLDER PHOTOS AUTOMATIC SHOW HERE) */}
+      {/* GALLERY SECTION */}
       <section id="gallery" className="py-12 sm:py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-2 text-gray-900">
@@ -390,6 +403,7 @@ export default function Home() {
                   <img
                     src={galleryUrl}
                     alt={img.name || `Gallery Drive ${index + 1}`}
+                    loading="lazy"
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
                     onClick={() => setSelectedImage(galleryUrl)}
