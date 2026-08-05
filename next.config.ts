@@ -5,11 +5,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.glideos.app",
+        hostname: "drive.google.com",
       },
       {
         protocol: "https",
-        hostname: "**.glideapps.dev",
+        hostname: "lh3.googleusercontent.com",
       },
     ],
   },
