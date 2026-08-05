@@ -100,10 +100,10 @@ export default function Home() {
       });
   }, []);
 
-  // Fetch Gallery Data from Google Apps Script
+  // Fetch Gallery Data from NEW Google Apps Script
   useEffect(() => {
     fetch(
-      "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
+      "https://script.google.com/macros/s/AKfycbzOH-l4pi_G9CoqiZ7Ah9LkyGP_LP9ob_PyTArLcNIv1DmC9UVC2v2gxUw8IJkETNXFUA/exec"
     )
       .then((res) => {
         if (!res.ok) throw new Error("Network response error");
@@ -295,8 +295,15 @@ export default function Home() {
                         onClick={() => setSelectedImage(displayImageUrl)}
                         onError={(e: any) => {
                           e.target.onerror = null;
-                          e.target.src =
-                            "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                          // Safe Mobile Bypass Proxy Fallback
+                          if (item.Image && item.Image.startsWith("http")) {
+                            e.target.src = `https://images.weserv.nl/?url=${encodeURIComponent(
+                              item.Image
+                            )}&w=600&output=jpg`;
+                          } else {
+                            e.target.src =
+                              "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                          }
                         }}
                       />
                     </div>
