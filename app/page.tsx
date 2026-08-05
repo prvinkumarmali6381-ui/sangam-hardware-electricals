@@ -10,7 +10,7 @@ type Product = {
   Category: string;
 };
 
-// Ultra-Robust Mobile Multi-Proxy Image Converter
+// Pure Direct & Google Drive Image Handler (GlideApp Logic Removed)
 const getFormattedImageUrl = (rawUrl: string) => {
   if (!rawUrl || rawUrl.trim() === "") {
     return "https://via.placeholder.com/400x300?text=Sangam+Hardware";
@@ -18,7 +18,7 @@ const getFormattedImageUrl = (rawUrl: string) => {
 
   const cleanUrl = rawUrl.trim().replace(/\r/g, "");
 
-  // 1. Google Drive direct stream URL format
+  // Convert Google Drive links to Direct Display Streams
   if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("lh3.googleusercontent.com")) {
     const match =
       cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -27,11 +27,6 @@ const getFormattedImageUrl = (rawUrl: string) => {
       return `https://lh3.googleusercontent.com/d/${match[1]}=w800`;
     }
     return cleanUrl;
-  }
-
-  // 2. GlideApp internal links routed through proxy with fallback
-  if (cleanUrl.includes("glide") || cleanUrl.includes("glideos.app")) {
-    return `https://images.weserv.nl/?url=${encodeURIComponent(cleanUrl)}&w=600&output=jpg`;
   }
 
   return cleanUrl;
@@ -71,7 +66,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // Safe TSV Fetch Logic
+  // TSV Fetch Logic
   useEffect(() => {
     const parseTSVData = (text: string) => {
       const rows = text.replace(/\r/g, "").trim().split("\n");
@@ -104,7 +99,7 @@ export default function Home() {
       });
   }, []);
 
-  // Fetch Gallery Data from Google Apps Script
+  // Drive Gallery Photos Fetch
   useEffect(() => {
     fetch(
       "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
@@ -299,13 +294,7 @@ export default function Home() {
                         onClick={() => setSelectedImage(displayImageUrl)}
                         onError={(e: any) => {
                           e.target.onerror = null;
-                          // If proxy fails, try direct raw URL or fallback image
-                          if (item.Image && e.target.src !== item.Image) {
-                            e.target.src = item.Image;
-                          } else {
-                            e.target.src =
-                              "https://via.placeholder.com/400x300?text=Sangam+Hardware";
-                          }
+                          e.target.src = "https://via.placeholder.com/400x300?text=Sangam+Hardware";
                         }}
                       />
                     </div>
