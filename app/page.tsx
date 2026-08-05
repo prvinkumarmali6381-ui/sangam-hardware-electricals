@@ -10,7 +10,7 @@ type Product = {
   Category: string;
 };
 
-// Pure Direct & Google Drive Image Handler (GlideApp Logic Removed)
+// Mobile Browser Safe Universal Image Parser
 const getFormattedImageUrl = (rawUrl: string) => {
   if (!rawUrl || rawUrl.trim() === "") {
     return "https://via.placeholder.com/400x300?text=Sangam+Hardware";
@@ -18,7 +18,7 @@ const getFormattedImageUrl = (rawUrl: string) => {
 
   const cleanUrl = rawUrl.trim().replace(/\r/g, "");
 
-  // Convert Google Drive links to Direct Display Streams
+  // 1. Convert Google Drive file URLs to Direct Mobile Displayable Stream
   if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("lh3.googleusercontent.com")) {
     const match =
       cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -29,6 +29,7 @@ const getFormattedImageUrl = (rawUrl: string) => {
     return cleanUrl;
   }
 
+  // 2. Direct Web & Cloud CDN Images
   return cleanUrl;
 };
 
@@ -66,7 +67,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // TSV Fetch Logic
+  // Safe Google TSV Sheet Fetch (Direct + Proxy Dual Fallback for Mobile Web)
   useEffect(() => {
     const parseTSVData = (text: string) => {
       const rows = text.replace(/\r/g, "").trim().split("\n");
@@ -99,7 +100,7 @@ export default function Home() {
       });
   }, []);
 
-  // Drive Gallery Photos Fetch
+  // Fetch Gallery Data from Google Apps Script
   useEffect(() => {
     fetch(
       "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
@@ -288,13 +289,14 @@ export default function Home() {
                       <img
                         src={displayImageUrl}
                         alt={item.Product}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
+                        loading="eager"
+                        decoding="async"
                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
                         onClick={() => setSelectedImage(displayImageUrl)}
                         onError={(e: any) => {
                           e.target.onerror = null;
-                          e.target.src = "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                          e.target.src =
+                            "https://via.placeholder.com/400x300?text=Sangam+Hardware";
                         }}
                       />
                     </div>
@@ -392,8 +394,8 @@ export default function Home() {
                   <img
                     src={galleryUrl}
                     alt={img.name || `Gallery Drive ${index + 1}`}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
+                    loading="eager"
+                    decoding="async"
                     className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
                     onClick={() => setSelectedImage(galleryUrl)}
                     onError={(e: any) => {
@@ -474,7 +476,6 @@ export default function Home() {
           <img
             src={selectedImage}
             alt="Product Preview"
-            referrerPolicy="no-referrer"
             className="max-w-full max-h-[90vh] rounded-lg object-contain shadow-2xl"
           />
 
