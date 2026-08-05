@@ -1,0 +1,7 @@
+const banners = [
+  "/images/hero.jpgg",
+  "/images/shop1.jpg",
+  "/images/shop-inside.jpg",
+  "/images/gallery1.jpg",
+  "/images/gallery2.jpg",
+];
