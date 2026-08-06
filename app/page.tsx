@@ -72,7 +72,7 @@ export default function Home() {
       .catch((err) => console.error("Sheet Fetch Error:", err));
   }, []);
 
-  // ONLY Google Drive Gallery Photos Fetch (Naya Apps Script URL)
+  // ONLY Google Drive Gallery Photos Fetch
   useEffect(() => {
     fetch(
       "https://script.google.com/macros/s/AKfycbxC48ot6hUMbSMLDPrmKJCOqzDVEWgXgzZvM6zOQe2k7_cBtjYk06nSOOzgmNKKu4bKTw/exec"
@@ -138,6 +138,16 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-b border-slate-200 px-6 py-4 flex flex-col gap-4 font-semibold text-slate-700 shadow-lg">
+            <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Home</a>
+            <a href="#products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Products</a>
+            <a href="#brands" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Brands</a>
+            <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Gallery</a>
+            <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Contact</a>
+          </div>
+        )}
       </nav>
 
       {/* HERO BANNER SECTION */}
@@ -194,6 +204,9 @@ export default function Home() {
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
               Featured Products
             </h2>
+            <p className="text-slate-600 text-base sm:text-lg">
+              Explore authentic hardware, electrical, and paint materials from top brands
+            </p>
           </div>
 
           <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 bg-white p-3 rounded-2xl border border-slate-200 shadow-md">
@@ -208,7 +221,7 @@ export default function Home() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
+              className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold cursor-pointer"
             >
               <option value="All">All Categories</option>
               <option value="Hardware">Hardware</option>
@@ -281,6 +294,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* BRANDS SECTION */}
+      <section id="brands" className="py-16 sm:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-10 text-slate-900">
+            Top Authorized Brands We Offer
+          </h2>
+
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
+            {["Asian Paints", "Havells", "Finolex", "Crompton", "Orbit", "Legrand"].map(
+              (brand) => (
+                <div
+                  key={brand}
+                  className="px-8 py-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm font-bold text-base sm:text-lg text-slate-800 hover:border-orange-500 hover:text-orange-600 transition cursor-default"
+                >
+                  {brand}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* GALLERY SECTION (ONLY GOOGLE DRIVE PHOTOS) */}
       <section id="gallery" className="py-16 sm:py-24 bg-slate-100 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -289,7 +324,7 @@ export default function Home() {
               Store Gallery
             </h2>
             <p className="text-slate-600 text-sm sm:text-base">
-              Google Drive Photos ({gallery.length})
+              Google Drive Photos ({gallery.length}) • Click on any picture to view full size
             </p>
           </div>
 
@@ -323,6 +358,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CONTACT & LOCATION DETAILS SECTION */}
+      <section id="contact" className="py-16 sm:py-24 bg-slate-900 text-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl sm:text-5xl font-black mb-6">Contact & Store Location</h2>
+
+          <p className="text-xl sm:text-2xl font-bold text-slate-100 mb-2">📍 Sangam Hardware & Electricals</p>
+          <p className="text-base text-slate-300 mb-2">No. 106, Nehru Bazaar, Opp. Bus Stand, Uthukottai - 602 026</p>
+          <p className="text-base text-slate-400 mb-2">🕘 Open All Days: 9:00 AM – 9:00 PM</p>
+          <p className="text-xl font-bold text-amber-400 mb-8">📞 +91 63814 37584 | +91 99441 02488</p>
+
+          <div className="flex justify-center gap-4 flex-wrap">
+            <a
+              href="tel:+916381437584"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
+            >
+              📞 Call Store
+            </a>
+
+            <a
+              href="https://wa.me/916381437584"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
+            >
+              💬 WhatsApp Us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* GOOGLE MAPS SECTION */}
+      <section className="py-16 bg-white border-t border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-8">
+            Find Us on Google Maps
+          </h2>
+
+          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl mb-6">
+            <iframe
+              src="https://www.google.com/maps?q=Sangam+Hardware+%26+Electricals&output=embed"
+              width="100%"
+              height="400"
+              loading="lazy"
+              className="border-0"
+            ></iframe>
+          </div>
+
+          <a
+            href="https://maps.app.goo.gl/ybjXnehZWDX2ogw67"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl shadow-md transition"
+          >
+            ⭐ View Store Reviews on Google Maps
+          </a>
+        </div>
+      </section>
+
       {/* FULLSCREEN PREVIEW */}
       {selectedImage && (
         <div
@@ -344,6 +437,25 @@ export default function Home() {
           </button>
         </div>
       )}
+
+      {/* FLOATING ACTION BUTTONS */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+        <a
+          href="https://wa.me/916381437584"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
+        >
+          💬
+        </a>
+
+        <a
+          href="tel:+916381437584"
+          className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
+        >
+          📞
+        </a>
+      </div>
     </main>
   );
 }
