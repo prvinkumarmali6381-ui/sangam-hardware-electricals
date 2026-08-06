@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// Google Apps Script Web App URL yahan paste karein
+// Google Apps Script Deploy URL yahan paste karein
 const SCRIPT_URL = "AAPKA_NEW_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
 export default function PremiumAdminDashboard() {
@@ -34,7 +34,7 @@ export default function PremiumAdminDashboard() {
     fetchProducts();
   }, []);
 
-  // Computer Photo to Compressed Web-Safe Image Conversion
+  // Image Processing & Compression
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -44,7 +44,7 @@ export default function PremiumAdminDashboard() {
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 800;
+          const MAX_WIDTH = 600;
           const scaleFactor = MAX_WIDTH / img.width;
           canvas.width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
           canvas.height = img.width > MAX_WIDTH ? img.height * scaleFactor : img.height;
@@ -52,8 +52,7 @@ export default function PremiumAdminDashboard() {
           const ctx = canvas.getContext("2d");
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
           
-          // Image compress and convert to lightweight JPEG
-          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
           setImageBase64(compressedBase64);
         };
       };
@@ -73,6 +72,7 @@ export default function PremiumAdminDashboard() {
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
 
@@ -85,7 +85,7 @@ export default function PremiumAdminDashboard() {
         alert("❌ Error: " + data.error);
       }
     } catch (err) {
-      alert("❌ Upload Failed!");
+      alert("❌ Upload Failed! Check SCRIPT_URL or Internet Connection.");
     } finally {
       setLoading(false);
     }
@@ -106,6 +106,7 @@ export default function PremiumAdminDashboard() {
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "delete", row }),
       });
       const data = await res.json();
@@ -126,6 +127,7 @@ export default function PremiumAdminDashboard() {
     setCategory("Electrical");
     setImageBase64("");
   };
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMcklfjEA2lBgJkHpH9psnRuNMUhOM3KtnpUD6WsbFXCzdAb84ZMu70E-X7pWTz8EwlA/exec";
 
   return (
     <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f8fafc", padding: "30px 20px", fontFamily: "system-ui" }}>
@@ -206,7 +208,7 @@ export default function PremiumAdminDashboard() {
             {imageBase64 && (
               <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "15px", background: "#0f172a", padding: "12px", borderRadius: "10px", border: "1px dashed #38bdf8" }}>
                 <img src={imageBase64} alt="Preview" style={{ width: "60px", height: "60px", objectFit: "contain", borderRadius: "6px" }} />
-                <span style={{ fontSize: "13px", color: "#38bdf8" }}>✓ Image Processed & Optimized for Sheet URL</span>
+                <span style={{ fontSize: "13px", color: "#38bdf8" }}>✓ Image Ready for Upload</span>
               </div>
             )}
 
