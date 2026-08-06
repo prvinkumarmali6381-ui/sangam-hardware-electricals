@@ -2,144 +2,84 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  setPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
-import { auth } from "@/lib/firebase";
 
-export default function AdminLoginPage() {
-  const router = useRouter();
-
+export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  
+  // FIX: Capital 'Router()' ki jagah 'useRouter()' hoga
+  const router = useRouter();
 
-  // 🔑 LOGIN HANDLER
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("Kripya Email aur Password dono fill karein!");
-      return;
-    }
 
-    try {
-      setLoading(true);
+    const envEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "sangamhardware@gmail.com";
+    const envPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || "Sangam@12345";
 
-      // Session persistent lock on browser tab close
-      await setPersistence(auth, browserSessionPersistence);
-
-      // Firebase Authentication Login
-      await signInWithEmailAndPassword(auth, email, password);
-
-      // Set admin session cookie
-      document.cookie = "admin=true; path=/;";
-
-      alert("✅ Login Successful!");
+    if (email === envEmail && password === envPassword) {
+      // Save auth session in LocalStorage
+      localStorage.setItem("isAdminLoggedIn", "true");
       router.push("/admin");
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        alert("User nahi mila! Check karein email registered hai ya nahi.");
-      } else if (
-        error.code === "auth/wrong-password" ||
-        error.code === "auth/invalid-credential"
-      ) {
-        alert("Email ya Password galat hai!");
-      } else if (error.code === "auth/invalid-email") {
-        alert("Email format sahi nahi hai!");
-      } else {
-        alert("❌ Error: " + error.message);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 🔄 FORGOT / RESET PASSWORD HANDLER
-  const handleForgotPassword = async () => {
-    if (!email) {
-      alert("Pehle apna Email box me likhein, fir 'Forgot Password?' par click karein!");
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert("📧 Password Reset Link aapke email par bhej diya gaya hai!");
-    } catch (error: any) {
-      if (error.code === "auth/user-not-found") {
-        alert("Is Email se koi account registered nahi hai.");
-      } else {
-        alert("❌ Error: " + error.message);
-      }
+    } else {
+      setError("Galat Email ya Password! Kripya sahi details dalein.");
     }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-center mb-6 text-gray-800">
-          Sangam Admin Login
-        </h1>
+    <main className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-slate-200">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-black text-slate-900">
+            Sangam Hardware Admin Login
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Product & Inventory Manage Karne Ke Liye Login Karein
+          </p>
+        </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-semibold mb-6 text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Admin Email
+            <label className="block text-sm font-bold text-slate-700 mb-1">
+              Email Address
             </label>
             <input
               type="email"
+              required
               placeholder="admin@example.com"
-              className="border border-gray-300 w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-slate-700 mb-1">
               Password
             </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="border border-gray-300 w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white pr-16"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3.5 text-xs font-bold text-gray-500 hover:text-orange-600 uppercase"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <input
+              type="password"
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-300 text-slate-900 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+            />
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="bg-orange-500 hover:bg-orange-600 text-white w-full py-3.5 rounded-xl font-bold transition shadow-md disabled:bg-gray-400 mt-2"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-2 text-base cursor-pointer"
           >
-            {loading ? "Logging In..." : "🔐 Login"}
+            🔓 Login to Dashboard
           </button>
         </form>
-
-        <div className="mt-6 text-center border-t border-gray-100 pt-4">
-          <button
-            type="button"
-            onClick={handleForgotPassword}
-            className="text-sm font-semibold text-orange-600 hover:underline"
-          >
-            🔑 Forgot Password? Reset Link Bhejo
-          </button>
-        </div>
       </div>
     </main>
   );
