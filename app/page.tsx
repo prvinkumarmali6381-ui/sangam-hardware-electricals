@@ -39,19 +39,9 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const localGallery = [
-    "/images/gallery1.jpeg",
-    "/images/gallery2.jpeg",
-    "/images/gallery3.jpeg",
-    "/images/gallery4.jpeg",
-    "/images/hero.jpg",
-    "/images/shop-front.jpeg",
-    "/images/shop-inside.jpeg",
-  ];
-
-  // Primary Hero Banner: Aapki Shop Front Image + Clean Hardware Images
+  // Primary Hero Banner
   const banners = [
-    "/images/shop-front.jpeg", // Aapki Shop Front Image
+    "/images/shop-front.jpeg",
     "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80",
     "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80",
     "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=1200&q=80"
@@ -100,10 +90,10 @@ export default function Home() {
       });
   }, []);
 
-  // Fetch Gallery Data
+  // Fetch ONLY Google Drive Gallery Photos
   useEffect(() => {
     fetch(
-      "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
+      "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec?type=gallery"
     )
       .then((res) => {
         if (!res.ok) throw new Error("Network response error");
@@ -359,7 +349,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GALLERY SECTION */}
+      {/* GALLERY SECTION (ONLY GOOGLE DRIVE PHOTOS) */}
       <section id="gallery" className="py-16 sm:py-24 bg-slate-100 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
@@ -367,55 +357,42 @@ export default function Home() {
               Store & Product Gallery
             </h2>
             <p className="text-slate-600 text-sm sm:text-base">
-              Click on any picture to view in high resolution
+              Live Google Drive Photos ({gallery.length}) • Click on any picture to view full size
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {localGallery.map((img, index) => (
-              <div
-                key={`local-${index}`}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
-              >
-                <img
-                  src={img}
-                  alt={`Gallery Local ${index + 1}`}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
-                  onClick={() => setSelectedImage(img)}
-                  onError={(e: any) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-                  }}
-                />
-              </div>
-            ))}
+          {gallery.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 font-medium">
+              Loading Google Drive Gallery Photos...
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {gallery.map((img: any, index: number) => {
+                const galleryUrl = getFormattedImageUrl(img.url);
 
-            {gallery.map((img: any, index: number) => {
-              const galleryUrl = getFormattedImageUrl(img.url);
-
-              return (
-                <div
-                  key={`drive-${index}`}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
-                >
-                  <img
-                    src={galleryUrl}
-                    alt={img.name || `Gallery Drive ${index + 1}`}
-                    loading="eager"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
-                    onClick={() => setSelectedImage(galleryUrl)}
-                    onError={(e: any) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+                return (
+                  <div
+                    key={`drive-${index}`}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
+                  >
+                    <img
+                      src={galleryUrl}
+                      alt={img.name || `Gallery Drive ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
+                      onClick={() => setSelectedImage(galleryUrl)}
+                      onError={(e: any) => {
+                        e.target.onerror = null;
+                        e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
