@@ -130,7 +130,7 @@ export default function PremiumAdminDashboard() {
     setCategory("Hardware");
     setImageBase64("");
   };
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMcklfjEA2lBgJkHpH9psnRuNMUhOM3KtnpUD6WsbFXCzdAb84ZMu70E-X7pWTz8EwlA/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWSBrVzdcJRpbYa6auxZxW2urJg6nGywTSaGbn7aiUny289tUXEq6O6RIU25xafnNCNw/exec";
 
   return (
     <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f8fafc", padding: "30px 20px", fontFamily: "system-ui" }}>

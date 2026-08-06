@@ -10,15 +10,14 @@ type Product = {
   Category: string;
 };
 
-// Mobile Browser Safe Universal Image Parser
+// Universal Image Parser with Google Drive Auto Direct Stream
 const getFormattedImageUrl = (rawUrl: string) => {
   if (!rawUrl || rawUrl.trim() === "") {
-    return "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+    return "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
   }
 
   const cleanUrl = rawUrl.trim().replace(/\r/g, "");
 
-  // 1. Convert Google Drive file URLs to Direct Mobile Displayable Stream
   if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("lh3.googleusercontent.com")) {
     const match =
       cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -29,7 +28,6 @@ const getFormattedImageUrl = (rawUrl: string) => {
     return cleanUrl;
   }
 
-  // 2. Direct Web & Cloud CDN Images
   return cleanUrl;
 };
 
@@ -67,7 +65,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // Safe Google TSV Sheet Fetch (Direct + Proxy Dual Fallback for Mobile Web)
+  // Safe Google TSV Sheet Fetch
   useEffect(() => {
     const parseTSVData = (text: string) => {
       const rows = text.replace(/\r/g, "").trim().split("\n");
@@ -100,7 +98,7 @@ export default function Home() {
       });
   }, []);
 
-  // Fetch Gallery Data from NEW Google Apps Script
+  // Fetch Gallery Data
   useEffect(() => {
     fetch(
       "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
@@ -121,26 +119,35 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-800 font-sans">
+    <main className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-orange-500 selection:text-white">
       {/* TOP ANNOUNCEMENT BAR */}
-      <div className="bg-gray-900 text-gray-200 text-xs sm:text-sm py-2 px-4 text-center sm:text-right flex justify-between sm:justify-end items-center gap-4">
-        <span>📍 No. 106, Nehru Bazaar, Opp. Bus Stand, Uthukottai - 602 026</span>
-        <span className="hidden md:inline">📞 +91 63814 37584 | 99441 02488</span>
+      <div className="bg-slate-900 border-b border-slate-800 text-slate-300 text-xs sm:text-sm py-2.5 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left">
+          <span className="flex items-center gap-2 font-medium">
+            <span className="text-orange-500">📍</span> No. 106, Nehru Bazaar, Opp. Bus Stand, Uthukottai - 602 026
+          </span>
+          <span className="font-semibold text-slate-200 hidden md:inline">
+            📞 +91 63814 37584 | 99441 02488
+          </span>
+        </div>
       </div>
 
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white shadow-md border-b border-gray-100">
+      <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-orange-500 via-red-600 to-amber-500 bg-clip-text text-transparent tracking-tight">
-            Sangam Hardware & Electricals
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
+            <span className="bg-gradient-to-r from-orange-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
+              Sangam Hardware
+            </span>{" "}
+            <span className="text-slate-400 font-light hidden sm:inline">& Electricals</span>
           </h1>
 
-          <div className="hidden md:flex gap-8 font-semibold text-gray-700">
-            <a href="#" className="hover:text-orange-500 transition">Home</a>
-            <a href="#products" className="hover:text-orange-500 transition">Products</a>
-            <a href="#brands" className="hover:text-orange-500 transition">Brands</a>
-            <a href="#gallery" className="hover:text-orange-500 transition">Gallery</a>
-            <a href="#contact" className="hover:text-orange-500 transition">Contact</a>
+          <div className="hidden md:flex gap-8 font-medium text-slate-300">
+            <a href="#" className="hover:text-orange-400 transition">Home</a>
+            <a href="#products" className="hover:text-orange-400 transition">Products</a>
+            <a href="#brands" className="hover:text-orange-400 transition">Brands</a>
+            <a href="#gallery" className="hover:text-orange-400 transition">Gallery</a>
+            <a href="#contact" className="hover:text-orange-400 transition">Contact</a>
           </div>
 
           <div className="flex items-center gap-3">
@@ -148,14 +155,14 @@ export default function Home() {
               href="https://wa.me/916381437584"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700 transition shadow-sm"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-900/30 flex items-center gap-2"
             >
-              WhatsApp
+              <span>💬</span> WhatsApp
             </a>
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-2xl text-gray-700 focus:outline-none ml-2"
+              className="md:hidden text-2xl text-slate-300 focus:outline-none ml-2"
             >
               {isMobileMenuOpen ? "✕" : "☰"}
             </button>
@@ -163,106 +170,95 @@ export default function Home() {
         </div>
 
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 flex flex-col gap-3 font-semibold shadow-inner">
-            <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-500">Home</a>
-            <a href="#products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-500">Products</a>
-            <a href="#brands" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-500">Brands</a>
-            <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-500">Gallery</a>
-            <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-500">Contact</a>
+          <div className="md:hidden bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-col gap-4 font-semibold text-slate-300 shadow-2xl">
+            <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-400">Home</a>
+            <a href="#products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-400">Products</a>
+            <a href="#brands" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-400">Brands</a>
+            <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-400">Gallery</a>
+            <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-400">Contact</a>
           </div>
         )}
       </nav>
 
       {/* HERO BANNER SECTION */}
-      <section className="relative h-[65vh] sm:h-[75vh] md:h-[85vh]">
+      <section className="relative h-[70vh] sm:h-[80vh] flex items-center justify-center overflow-hidden">
         <Image
           src={banners[currentBanner]}
           alt="Sangam Hardware Banner"
           fill
           priority
           unoptimized={true}
-          className="object-cover"
+          className="object-cover opacity-35 scale-105 transition-transform duration-1000"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30 flex items-center justify-center">
-          <div className="text-center text-white px-4 max-w-4xl">
-            <span className="bg-orange-500/20 border border-orange-400 text-orange-200 text-xs sm:text-sm font-semibold uppercase tracking-widest px-3 py-1 rounded-full inline-block mb-3">
-              Trusted Quality & Professional Service
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <span className="bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs sm:text-sm font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full inline-block mb-4 backdrop-blur-md">
+            Premium Hardware & Building Supplies
+          </span>
+          <h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white mb-4 leading-tight">
+            Sangam Hardware <br />
+            <span className="bg-gradient-to-r from-orange-400 to-amber-500 bg-clip-text text-transparent">
+              & Electricals
             </span>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
-              Sangam Hardware & Electricals
-            </h2>
-            <p className="mt-4 text-base sm:text-xl text-gray-200">
-              Hardware • Electrical • Paints • Plumbing
-            </p>
+          </h2>
+          <p className="text-lg sm:text-2xl text-slate-300 font-light max-w-2xl mx-auto mb-8">
+            Hardware • Electrical • Paints • Plumbing
+          </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <a
-                href="tel:+916381437584"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg text-center"
-              >
-                📞 Call Now
-              </a>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a
+              href="tel:+916381437584"
+              className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-xl shadow-orange-950/40 text-center"
+            >
+              📞 Call Store Now
+            </a>
 
-              <a
-                href="https://wa.me/916381437584"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg text-center"
-              >
-                💬 WhatsApp
-              </a>
-            </div>
+            <a
+              href="https://wa.me/916381437584"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-xl shadow-emerald-950/40 text-center"
+            >
+              💬 Instant WhatsApp Enquiry
+            </a>
           </div>
         </div>
       </section>
 
       {/* PRODUCTS SECTION */}
-      <section id="products" className="py-12 sm:py-16 bg-gray-100">
+      <section id="products" className="py-16 sm:py-24 bg-slate-900 border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-2 text-gray-900">
-            Our Products
-          </h2>
-          <p className="text-center text-gray-500 mb-6 text-sm sm:text-base">
-            Explore our wide selection of store items
-          </p>
-
-          <div className="flex justify-center gap-4 mb-8">
-            <a
-              href="tel:+916381437584"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-bold shadow transition text-sm sm:text-base"
-            >
-              📞 Call Now
-            </a>
-            <a
-              href="https://wa.me/916381437584"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-xl font-bold shadow transition text-sm sm:text-base"
-            >
-              💬 WhatsApp
-            </a>
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-5xl font-black text-white mb-3 tracking-tight">
+              Our Product Catalog
+            </h2>
+            <p className="text-slate-400 text-base sm:text-lg">
+              Search and filter high-quality store items synced directly with live inventory
+            </p>
           </div>
 
-          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-3 mb-10">
+          {/* Search & Filter Bar */}
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 bg-slate-950/80 p-3 rounded-2xl border border-slate-800 shadow-xl backdrop-blur-md">
             <input
               type="text"
-              placeholder="🔍 Search Products..."
+              placeholder="🔍 Search Products by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-3 flex-1 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+              className="bg-slate-900 border border-slate-800 text-white rounded-xl px-4 py-3 flex-1 focus:outline-none focus:border-orange-500 transition"
             />
 
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="border border-gray-300 rounded-xl px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white font-medium"
+              className="bg-slate-900 border border-slate-800 text-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 font-medium transition cursor-pointer"
             >
-              <option>All</option>
-              <option>Hardware</option>
-              <option>Electrical</option>
-              <option>Paints</option>
-              <option>Plumbing</option>
+              <option value="All">All Categories</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Electrical">Electrical</option>
+              <option value="Paints">Paints</option>
+              <option value="Plumbing">Plumbing</option>
             </select>
           </div>
 
@@ -283,42 +279,42 @@ export default function Home() {
                 return (
                   <div
                     key={index}
-                    className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300"
+                    className="bg-slate-950/60 border border-slate-800/80 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-orange-500/50 hover:shadow-2xl hover:shadow-orange-950/20 transition-all duration-300 group"
                   >
-                    <div className="relative h-60 w-full bg-gray-100 overflow-hidden">
+                    <div className="relative h-64 w-full bg-slate-900 overflow-hidden flex items-center justify-center p-4">
                       <img
                         src={displayImageUrl}
                         alt={item.Product}
                         loading="eager"
                         decoding="async"
-                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
+                        referrerPolicy="no-referrer"
+                        className="max-h-full max-w-full object-contain cursor-pointer group-hover:scale-105 transition-transform duration-500"
                         onClick={() => setSelectedImage(displayImageUrl)}
                         onError={(e: any) => {
                           e.target.onerror = null;
-                          // Safe Mobile Bypass Proxy Fallback
                           if (item.Image && item.Image.startsWith("http")) {
                             e.target.src = `https://images.weserv.nl/?url=${encodeURIComponent(
                               item.Image
                             )}&w=600&output=jpg`;
                           } else {
                             e.target.src =
-                              "https://via.placeholder.com/400x300?text=Sangam+Hardware";
+                              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
                           }
                         }}
                       />
                     </div>
 
-                    <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div className="p-6 flex-1 flex flex-col justify-between border-t border-slate-800/50">
                       <div>
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-lg font-bold text-gray-800 line-clamp-2">
+                        <div className="flex justify-between items-start gap-2 mb-3">
+                          <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-orange-400 transition">
                             {item.Product}
                           </h3>
-                          <span className="bg-orange-50 text-orange-700 border border-orange-200 text-xs font-semibold px-2.5 py-1 rounded-full capitalize">
-                            {item.Category}
+                          <span className="bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap">
+                            {item.Category || "Hardware"}
                           </span>
                         </div>
-                        <p className="text-orange-600 font-extrabold text-xl mb-4">₹ {item.Price}</p>
+                        <p className="text-amber-400 font-extrabold text-2xl mb-6">₹ {item.Price}</p>
                       </div>
 
                       <a
@@ -327,7 +323,7 @@ export default function Home() {
                         )} ke baare me jankari chahiye.`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full bg-green-600 hover:bg-green-700 text-white text-center py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-center gap-2"
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-center py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-emerald-950/30 flex items-center justify-center gap-2"
                       >
                         💬 Enquire on WhatsApp
                       </a>
@@ -340,9 +336,9 @@ export default function Home() {
       </section>
 
       {/* BRANDS SECTION */}
-      <section id="brands" className="py-12 sm:py-16 bg-white">
+      <section id="brands" className="py-16 sm:py-20 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-10 text-gray-900">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-10 text-white">
             Top Brands We Stock
           </h2>
 
@@ -351,7 +347,7 @@ export default function Home() {
               (brand) => (
                 <div
                   key={brand}
-                  className="px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl shadow-sm font-bold text-base sm:text-lg text-gray-800 hover:border-orange-500 hover:text-orange-600 transition cursor-default"
+                  className="px-8 py-4 bg-slate-900 border border-slate-800 rounded-2xl shadow-lg font-bold text-base sm:text-lg text-slate-200 hover:border-orange-500 hover:text-orange-400 transition cursor-default"
                 >
                   {brand}
                 </div>
@@ -362,29 +358,32 @@ export default function Home() {
       </section>
 
       {/* GALLERY SECTION */}
-      <section id="gallery" className="py-12 sm:py-16 bg-gray-100">
+      <section id="gallery" className="py-16 sm:py-24 bg-slate-900 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-2 text-gray-900">
-            Our Shop Gallery
-          </h2>
-          <p className="text-center text-gray-500 mb-10 text-sm sm:text-base">
-            Tap on any image for full-screen view
-          </p>
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-5xl font-black text-white mb-3">
+              Store Gallery
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Tap on any image for full-screen view
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {localGallery.map((img, index) => (
               <div
                 key={`local-${index}`}
-                className="overflow-hidden rounded-2xl shadow-sm bg-gray-200 aspect-square hover:shadow-lg transition duration-300"
+                className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 aspect-square hover:border-orange-500/50 transition duration-300"
               >
                 <img
                   src={img}
                   alt={`Gallery Local ${index + 1}`}
-                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
                   onClick={() => setSelectedImage(img)}
                   onError={(e: any) => {
                     e.target.onerror = null;
-                    e.target.src = "https://via.placeholder.com/400x300?text=Gallery+Image";
+                    e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
                   }}
                 />
               </div>
@@ -396,18 +395,19 @@ export default function Home() {
               return (
                 <div
                   key={`drive-${index}`}
-                  className="overflow-hidden rounded-2xl shadow-sm bg-gray-200 aspect-square hover:shadow-lg transition duration-300"
+                  className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 aspect-square hover:border-orange-500/50 transition duration-300"
                 >
                   <img
                     src={galleryUrl}
                     alt={img.name || `Gallery Drive ${index + 1}`}
                     loading="eager"
                     decoding="async"
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-300"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
                     onClick={() => setSelectedImage(galleryUrl)}
                     onError={(e: any) => {
                       e.target.onerror = null;
-                      e.target.src = "https://via.placeholder.com/400x300?text=Gallery+Image";
+                      e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
                     }}
                   />
                 </div>
@@ -418,18 +418,18 @@ export default function Home() {
       </section>
 
       {/* CONTACT SECTION */}
-      <section id="contact" className="py-12 sm:py-16 bg-slate-900 text-white">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-6">Contact Us</h2>
+      <section id="contact" className="py-16 sm:py-24 bg-slate-950 border-t border-slate-800 text-white">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl sm:text-5xl font-black mb-6">Visit Our Store</h2>
 
-          <p className="text-lg sm:text-xl text-gray-300 mb-2">📍 Sangam Hardware & Electricals</p>
-          <p className="text-base text-gray-400 mb-2">🕘 9:00 AM – 9:00 PM (Mon - Sun)</p>
-          <p className="text-lg font-bold text-orange-400 mb-8">📞 +91 6381437584, 9944102488</p>
+          <p className="text-lg sm:text-xl text-slate-300 mb-2">📍 Sangam Hardware & Electricals</p>
+          <p className="text-base text-slate-400 mb-2">🕘 9:00 AM – 9:00 PM (Mon - Sun)</p>
+          <p className="text-xl font-bold text-amber-400 mb-8">📞 +91 63814 37584, 99441 02488</p>
 
           <div className="flex justify-center gap-4 flex-wrap">
             <a
               href="tel:+916381437584"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-md"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
             >
               📞 Call Now
             </a>
@@ -438,7 +438,7 @@ export default function Home() {
               href="https://wa.me/916381437584"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition shadow-md"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
             >
               💬 WhatsApp
             </a>
@@ -446,14 +446,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* GOOGLE MAPS & REVIEWS SECTION */}
-      <section className="py-12 sm:py-16 bg-white">
+      {/* MAP SECTION */}
+      <section className="py-16 bg-slate-900 border-t border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">
-            Store Location
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-8">
+            Store Location & Navigation
           </h2>
 
-          <div className="rounded-2xl overflow-hidden shadow-md border border-gray-200 mb-6">
+          <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl mb-6">
             <iframe
               src="https://www.google.com/maps?q=Sangam+Hardware+%26+Electricals&output=embed"
               width="100%"
@@ -467,7 +467,7 @@ export default function Home() {
             href="https://maps.app.goo.gl/ybjXnehZWDX2ogw67"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold px-6 py-3 rounded-xl shadow transition"
+            className="inline-block bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold px-8 py-3.5 rounded-xl shadow-xl transition"
           >
             ⭐ Read Google Reviews
           </a>
@@ -477,17 +477,18 @@ export default function Home() {
       {/* FULLSCREEN IMAGE MODAL PREVIEW */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 bg-slate-950/95 flex items-center justify-center z-50 p-4 backdrop-blur-md"
           onClick={() => setSelectedImage(null)}
         >
           <img
             src={selectedImage}
             alt="Product Preview"
-            className="max-w-full max-h-[90vh] rounded-lg object-contain shadow-2xl"
+            referrerPolicy="no-referrer"
+            className="max-w-full max-h-[90vh] rounded-xl object-contain shadow-2xl border border-slate-800"
           />
 
           <button
-            className="absolute top-5 right-5 text-white text-3xl sm:text-4xl font-bold bg-gray-800/60 hover:bg-gray-800 w-12 h-12 rounded-full flex items-center justify-center transition"
+            className="absolute top-5 right-5 text-white text-3xl font-bold bg-slate-800/80 hover:bg-slate-700 w-12 h-12 rounded-full flex items-center justify-center transition"
             onClick={() => setSelectedImage(null)}
           >
             ✕
@@ -495,20 +496,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* FLOATING ACTION BUTTONS FOR MOBILE */}
+      {/* FLOATING ACTION BUTTONS */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
         <a
           href="https://wa.me/916381437584"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-green-500 hover:bg-green-600 text-white p-3.5 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
+          className="bg-emerald-500 hover:bg-emerald-400 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
         >
           💬
         </a>
 
         <a
           href="tel:+916381437584"
-          className="bg-orange-500 hover:bg-orange-600 text-white p-3.5 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
+          className="bg-orange-500 hover:bg-orange-400 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
         >
           📞
         </a>
