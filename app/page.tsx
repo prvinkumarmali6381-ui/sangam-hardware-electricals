@@ -92,6 +92,22 @@ export default function Home() {
       });
   }, []);
 
+  // Native Web Share Functionality
+  const handleShareWebsite = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "Sangam Hardware & Electricals",
+          text: "Check out Sangam Hardware & Electricals for Building Hardware, Electricals, Paints & Plumbing materials!",
+          url: window.location.href,
+        })
+        .catch((err) => console.log("Share canceled:", err));
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Website Link copied to clipboard!");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800 font-sans">
       {/* TOP ANNOUNCEMENT BAR */}
@@ -100,9 +116,19 @@ export default function Home() {
           <span className="flex items-center gap-2 font-medium">
             <span className="text-orange-400">📍</span> No. 106, Nehru Bazaar, Opp. Bus Stand, Uthukottai - 602 026
           </span>
-          <span className="font-semibold text-slate-100 hidden md:inline">
-            📞 +91 63814 37584 | 99441 02488
-          </span>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://www.instagram.com/sangamhardwareelectricals?igsh=dTF3bTF6OHJsbWI3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-400 hover:text-pink-300 transition flex items-center gap-1 font-semibold"
+            >
+              📷 Instagram
+            </a>
+            <span className="font-semibold text-slate-100 hidden md:inline">
+              📞 +91 63814 37584 | 99441 02488
+            </span>
+          </div>
         </div>
       </div>
 
@@ -125,6 +151,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={handleShareWebsite}
+              className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2.5 rounded-xl font-bold text-sm transition border border-slate-300 flex items-center gap-1.5"
+            >
+              <span>🔗</span> Share
+            </button>
+
             <a
               href="https://wa.me/916381437584"
               target="_blank"
@@ -150,6 +183,14 @@ export default function Home() {
             <a href="#brands" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Brands</a>
             <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Gallery</a>
             <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Contact</a>
+            <a
+              href="https://www.instagram.com/sangamhardwareelectricals?igsh=dTF3bTF6OHJsbWI3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-pink-600 hover:text-pink-700 flex items-center gap-2"
+            >
+              📷 Follow on Instagram
+            </a>
           </div>
         )}
       </nav>
@@ -370,7 +411,17 @@ export default function Home() {
           <p className="text-xl sm:text-2xl font-bold text-slate-100 mb-2">📍 Sangam Hardware & Electricals</p>
           <p className="text-base text-slate-300 mb-2">No. 106, Nehru Bazaar, Opp. Bus Stand, Uthukottai - 602 026</p>
           <p className="text-base text-slate-400 mb-2">🕘 Open All Days: 9:00 AM – 9:00 PM</p>
-          <p className="text-xl font-bold text-amber-400 mb-8">📞 +91 63814 37584 | +91 99441 02488</p>
+          <p className="text-xl font-bold text-amber-400 mb-6">📞 +91 63814 37584 | +91 99441 02488</p>
+
+          {/* INSTAGRAM LINK IN CONTACT SECTION */}
+          <a
+            href="https://www.instagram.com/sangamhardwareelectricals?igsh=dTF3bTF6OHJsbWI3"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-95 transition mb-8"
+          >
+            📷 Follow Us on Instagram @sangamhardwareelectricals
+          </a>
 
           <div className="flex justify-center gap-4 flex-wrap">
             <a
@@ -442,8 +493,16 @@ export default function Home() {
         </div>
       )}
 
-      {/* FLOATING ACTION BUTTONS */}
+      {/* FLOATING ACTION BUTTONS (WITH SHARE BUTTON) */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
+        <button
+          onClick={handleShareWebsite}
+          className="bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
+          title="Share Website"
+        >
+          🔗
+        </button>
+
         <a
           href="https://wa.me/916381437584"
           target="_blank"
