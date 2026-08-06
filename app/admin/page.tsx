@@ -1,8 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
 
-// Google Apps Script Deploy URL yahan paste karein
-const SCRIPT_URL = "AAPKA_NEW_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+
+// Google Apps Script Deploy URL (Single Declaration)
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxWSBrVzdcJRpbYa6auxZxW2urJg6nGywTSaGbn7aiUny289tUXEq6O6RIU25xafnNCNw/exec";
 
 export default function PremiumAdminDashboard() {
   const [products, setProducts] = useState<any[]>([]);
@@ -13,9 +18,66 @@ export default function PremiumAdminDashboard() {
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const router = useRouter();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Categories Array
   const categoriesList = ["Hardware", "Electrical", "Paints", "Plumbing"];
+
+  // 1. Logout Function
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      localStorage.removeItem("isAdminLoggedIn");
+      router.push("/admin/login");
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
+
+  // 2. 20-Minute Inactivity Timer Setup
+  const resetIdleTimer = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      alert("Security Alert: 20 minute tak inactive rehne ki wajah se automatic logout kar diya gaya hai.");
+      handleLogout();
+    }, 1200000); // 20 Min = 1,200,000 ms
+  };
+
+  useEffect(() => {
+    // Auth Protection Check
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const localAuth = localStorage.getItem("isAdminLoggedIn");
+      if (user || localAuth === "true") {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        router.push("/admin/login");
+      }
+      setAuthLoading(false);
+    });
+
+    // Reset timer on user activity
+    const activityEvents = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    const handleUserActivity = () => resetIdleTimer();
+
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, handleUserActivity);
+    });
+
+    resetIdleTimer();
+
+    return () => {
+      unsubscribe();
+      if (timerRef.current) clearTimeout(timerRef.current);
+      activityEvents.forEach((event) => {
+        window.removeEventListener(event, handleUserActivity);
+      });
+    };
+  }, [router]);
 
   // Sheet Data Fetch
   const fetchProducts = async () => {
@@ -34,8 +96,10 @@ export default function PremiumAdminDashboard() {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    if (isAuthenticated) {
+      fetchProducts();
+    }
+  }, [isAuthenticated]);
 
   // Image Processing & Compression
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +118,7 @@ export default function PremiumAdminDashboard() {
 
           const ctx = canvas.getContext("2d");
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
+
           const compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
           setImageBase64(compressedBase64);
         };
@@ -130,23 +194,39 @@ export default function PremiumAdminDashboard() {
     setCategory("Hardware");
     setImageBase64("");
   };
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWSBrVzdcJRpbYa6auxZxW2urJg6nGywTSaGbn7aiUny289tUXEq6O6RIU25xafnNCNw/exec";
+
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0f172a", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold" }}>
+        Verifying Admin Security Permissions...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) return null;
 
   return (
     <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f8fafc", padding: "30px 20px", fontFamily: "system-ui" }}>
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
         
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+        {/* Header with Logout & Sync Buttons */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", flexWrap: "wrap", gap: "15px" }}>
           <div>
             <h1 style={{ fontSize: "28px", fontWeight: "700", background: "linear-gradient(to right, #38bdf8, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Sangam Hardware Pro Admin
             </h1>
-            <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "4px" }}>Manage Cloud Products & Google Sheet Sync</p>
+            <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "4px" }}>Manage Cloud Products & Google Sheet Sync (Auto-Logout: 20 min)</p>
           </div>
-          <button onClick={fetchProducts} style={{ background: "#1e293b", border: "1px solid #334155", color: "#e2e8f0", padding: "8px 16px", borderRadius: "8px", cursor: "pointer" }}>
-            🔄 Sync Data
-          </button>
+
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <button onClick={fetchProducts} style={{ background: "#1e293b", border: "1px solid #334155", color: "#e2e8f0", padding: "8px 16px", borderRadius: "8px", cursor: "pointer" }}>
+              🔄 Sync Data
+            </button>
+
+            <button onClick={handleLogout} style={{ background: "#ef4444", border: "none", color: "#ffffff", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontWeight: "bold" }}>
+              🔒 Logout
+            </button>
+          </div>
         </div>
 
         {/* Form Card */}
