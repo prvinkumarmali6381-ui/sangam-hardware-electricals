@@ -1,29 +1,19 @@
 "use client";
+import { useState, useEffect } from "react";
 
-import { useEffect, useState } from "react";
+// Google Apps Script Deploy Web App URL yahan replace karein
+const SCRIPT_URL = "AAPKA_NEW_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
-type ProductItem = {
-  row: number;
-  product: string;
-  price: string;
-  image: string;
-  category: string;
-};
-
-export default function AdminPage() {
-  const [products, setProducts] = useState<ProductItem[]>([]);
-  const [product, setProduct] = useState("");
+export default function AdminDashboard() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("hardware");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
+  const [category, setCategory] = useState("Hardware");
+  const [imageBase64, setImageBase64] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbzMcklfjEA2lBgJkHpH9psnRuNMUhOM3KtnpUD6WsbFXCzdAb84ZMu70E-X7pWTz8EwlA/exec";
-
-  // Google Sheet Se Products List Fetch Karein
+  // 1. Google Sheet se Products Fetch Karein
   const fetchProducts = async () => {
     try {
       const res = await fetch(SCRIPT_URL);
@@ -32,7 +22,7 @@ export default function AdminPage() {
         setProducts(data);
       }
     } catch (err) {
-      console.error("Sheet Fetch Error:", err);
+      console.error("Fetch Error:", err);
     }
   };
 
@@ -40,203 +30,177 @@ export default function AdminPage() {
     fetchProducts();
   }, []);
 
-  // Image Selection Handler
+  // 2. Computer se photo select karke Base64 string banana
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.onloadend = () => {
+        setImageBase64(reader.result as string);
+      };
       reader.readAsDataURL(file);
     }
   };
 
-  // Submit Handler (Add / Edit)
+  // 3. Product Add / Edit Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product || !price) {
-      alert("Product Name aur Price bharein!");
-      return;
-    }
-
     setLoading(true);
 
-    const payload = {
-      action: editingRow ? "edit" : "add",
-      row: editingRow,
-      product,
-      price,
-      category,
-      image: imagePreview || "",
-    };
+    const payload = editingRow
+      ? {
+          action: "edit",
+          row: editingRow,
+          product: productName,
+          price: price,
+          category: category,
+          image: imageBase64,
+        }
+      : {
+          action: "add",
+          product: productName,
+          price: price,
+          category: category,
+          image: imageBase64,
+        };
 
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
-      const resData = await res.json();
 
-      if (resData.success) {
-        alert(editingRow ? "✅ Product Update Ho Gaya!" : "✅ Naya Product Save Ho Gaya!");
+      const data = await res.json();
+      if (data.success) {
+        alert(editingRow ? "✅ Product Updated Successfully!" : "✅ Product Saved to Google Sheet!");
         resetForm();
         fetchProducts();
       } else {
-        alert("❌ Error: " + (resData.error || "Unknown Error"));
+        alert("❌ Error: " + data.error);
       }
     } catch (err) {
-      alert("❌ Network Error!");
+      console.error(err);
+      alert("❌ Operation Failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // Delete Handler
+  // 4. Product Edit Trigger
+  const handleEdit = (item: any) => {
+    setEditingRow(item.row);
+    setProductName(item.product);
+    setPrice(item.price);
+    setCategory(item.category || "Hardware");
+    setImageBase64(item.image || "");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 5. Product Delete Handler
   const handleDelete = async (row: number) => {
     if (!confirm("Kya aap is product ko delete karna chahte hain?")) return;
-
     setLoading(true);
+
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "delete", row }),
+        body: JSON.stringify({ action: "delete", row: row }),
       });
-      const resData = await res.json();
-
-      if (resData.success) {
-        alert("🗑️ Product Delete Ho Gaya!");
+      const data = await res.json();
+      if (data.success) {
+        alert("✅ Product Deleted!");
         fetchProducts();
       }
     } catch (err) {
-      alert("❌ Delete Error!");
+      alert("❌ Delete Failed");
     } finally {
       setLoading(false);
     }
-  };
-
-  const startEdit = (item: ProductItem) => {
-    setEditingRow(item.row);
-    setProduct(item.product);
-    setPrice(item.price);
-    setCategory(item.category || "hardware");
-    setImagePreview(item.image || null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const resetForm = () => {
     setEditingRow(null);
-    setProduct("");
+    setProductName("");
     setPrice("");
-    setCategory("hardware");
-    setImagePreview(null);
+    setCategory("Hardware");
+    setImageBase64("");
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 sm:p-8 max-w-4xl mx-auto space-y-8">
-      {/* HEADER */}
-      <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 text-center">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800">
-          Sangam Admin Panel
-        </h1>
-      </div>
+    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
+      <h2>Sangam Hardware - Product Admin Panel</h2>
 
-      {/* FORM: ADD & EDIT */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">
-          {editingRow ? "✏️ Edit Product Details" : "🚀 Add New Product"}
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Product Name
-            </label>
+      {/* Product Form */}
+      <div style={{ background: "#f8f9fa", padding: "20px", borderRadius: "10px", marginBottom: "30px" }}>
+        <h3>{editingRow ? "✏️ Edit Product Details" : "➕ Add New Product"}</h3>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "10px" }}>
+            <label>Product Name: </label>
             <input
               type="text"
-              placeholder="e.g. Tek wood door 80x36"
-              value={product}
-              onChange={(e) => setProduct(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none"
+              value={productName}
+              onChange={(e) => setProductName(e.target.value)}
               required
+              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Price (₹)
-              </label>
+          <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
+            <div style={{ flex: 1 }}>
+              <label>Price (₹): </label>
               <input
                 type="number"
-                placeholder="e.g. 16000"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none"
                 required
+                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
               />
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Category
-              </label>
+            <div style={{ flex: 1 }}>
+              <label>Category: </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-orange-500 outline-none bg-white font-medium"
+                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
               >
-                <option value="hardware">Hardware</option>
-                <option value="electrical">Electrical</option>
-                <option value="plumbing">Plumbing</option>
-                <option value="paints">Paints</option>
+                <option value="Hardware">Hardware</option>
+                <option value="Electrical">Electrical</option>
               </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Product Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
-            />
+          <div style={{ marginBottom: "15px" }}>
+            <label>Computer se Photo Select Karein: </label>
+            <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginTop: "5px" }} />
           </div>
 
-          {imagePreview && (
-            <div className="mt-4 border-2 border-dashed border-orange-300 rounded-xl p-2 bg-orange-50/50 flex flex-col items-center">
-              <span className="text-xs font-bold text-orange-600 mb-2">
-                📸 Photo Selected Preview
-              </span>
-              <img
-                src={imagePreview}
-                alt="Product Preview"
-                className="h-44 object-cover rounded-lg shadow-sm"
-              />
+          {imageBase64 && (
+            <div style={{ marginBottom: "15px" }}>
+              <p>Selected Photo Preview:</p>
+              <img src={imageBase64} alt="Preview" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px" }} />
             </div>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div style={{ display: "flex", gap: "10px" }}>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md transition disabled:opacity-50"
+              style={{
+                padding: "10px 20px",
+                background: editingRow ? "#28a745" : "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "5px",
+                cursor: "pointer",
+              }}
             >
-              {loading
-                ? "⏳ Processing..."
-                : editingRow
-                ? "✏️ Update Product"
-                : "🚀 Save Product"}
+              {loading ? "⏳ Processing..." : editingRow ? "Update Product" : "Save Product"}
             </button>
-
             {editingRow && (
               <button
                 type="button"
                 onClick={resetForm}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold px-5 py-3 rounded-xl transition"
+                style={{ padding: "10px 20px", background: "#6c757d", color: "#fff", border: "none", borderRadius: "5px" }}
               >
                 Cancel
               </button>
@@ -245,67 +209,31 @@ export default function AdminPage() {
         </form>
       </div>
 
-      {/* GOOGLE SHEET PRODUCTS DATA LIST */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">
-          All Google Sheet Products ({products.length})
-        </h2>
+      {/* Google Sheet Products Display Table/Grid */}
+      <h3>All Google Sheet Products ({products.length})</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
+        {products.map((item) => (
+          <div key={item.row} style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "15px", textAlign: "center", background: "#fff" }}>
+            <img
+              src={item.image || "https://via.placeholder.com/150"}
+              alt={item.product}
+              style={{ width: "100%", height: "140px", objectFit: "contain", marginBottom: "10px" }}
+            />
+            <h4 style={{ margin: "5px 0" }}>{item.product}</h4>
+            <p style={{ margin: "5px 0", color: "#28a745", fontWeight: "bold" }}>₹{item.price}</p>
+            <p style={{ margin: "5px 0", fontSize: "12px", color: "#6c757d" }}>Category: {item.category}</p>
 
-        <div className="space-y-3">
-          {products.length === 0 ? (
-            <p className="text-gray-500 text-center py-4 font-medium">
-              Google Sheet se data load ho raha hai...
-            </p>
-          ) : (
-            products.map((item) => (
-              <div
-                key={item.row}
-                className="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition"
-              >
-                <div className="flex items-center gap-3">
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.product}
-                      className="w-14 h-14 object-cover rounded-lg border bg-gray-100"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-semibold text-gray-400 border">
-                      No Pic
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-bold text-gray-800 text-base">
-                      {item.product}
-                    </h3>
-                    <p className="text-sm text-orange-600 font-bold">
-                      ₹ {item.price}{" "}
-                      <span className="text-xs text-gray-500 font-normal capitalize">
-                        ({item.category})
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(item)}
-                    className="bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-3.5 py-2 rounded-lg text-xs transition"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.row)}
-                    className="bg-red-100 hover:bg-red-200 text-red-700 font-bold px-3.5 py-2 rounded-lg text-xs transition"
-                  >
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px" }}>
+              <button onClick={() => handleEdit(item)} style={{ padding: "5px 10px", background: "#ffc107", border: "none", borderRadius: "4px" }}>
+                ✏️ Edit
+              </button>
+              <button onClick={() => handleDelete(item.row)} style={{ padding: "5px 10px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}>
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }
