@@ -10,7 +10,7 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -18,48 +18,48 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // 🔑 LOGIN FUNCTION
-  const login = async (e: React.FormEvent) => {
+  // 🔑 LOGIN HANDLER
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      alert("Kripya Email aur Password dono bharein!");
+      alert("Kripya Email aur Password dono fill karein!");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Session Tab close hone par expire karne ke liye persistence setting
+      // Session persistent lock on browser tab close
       await setPersistence(auth, browserSessionPersistence);
 
-      // Firebase Authentication
+      // Firebase Authentication Login
       await signInWithEmailAndPassword(auth, email, password);
 
-      // Session Cookie
+      // Set admin session cookie
       document.cookie = "admin=true; path=/;";
 
       alert("✅ Login Successful!");
       router.push("/admin");
     } catch (error: any) {
       if (error.code === "auth/user-not-found") {
-        alert("User nahi mila! Check karein ki email Firebase mein registered hai ya nahi.");
+        alert("User nahi mila! Check karein email registered hai ya nahi.");
       } else if (
         error.code === "auth/wrong-password" ||
         error.code === "auth/invalid-credential"
       ) {
         alert("Email ya Password galat hai!");
       } else if (error.code === "auth/invalid-email") {
-        alert("Email format galat hai!");
+        alert("Email format sahi nahi hai!");
       } else {
-        alert(error.message);
+        alert("❌ Error: " + error.message);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔄 FORGOT / RESET PASSWORD FUNCTION
-  const forgotPassword = async () => {
+  // 🔄 FORGOT / RESET PASSWORD HANDLER
+  const handleForgotPassword = async () => {
     if (!email) {
       alert("Pehle apna Email box me likhein, fir 'Forgot Password?' par click karein!");
       return;
@@ -67,24 +67,24 @@ export default function LoginPage() {
 
     try {
       await sendPasswordResetEmail(auth, email);
-      alert("📧 Password Reset Link aapke Email par bhej diya gaya hai. Apna Email check karein!");
+      alert("📧 Password Reset Link aapke email par bhej diya gaya hai!");
     } catch (error: any) {
       if (error.code === "auth/user-not-found") {
         alert("Is Email se koi account registered nahi hai.");
       } else {
-        alert(error.message);
+        alert("❌ Error: " + error.message);
       }
     }
   };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-extrabold text-center mb-6 text-gray-800">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-center mb-6 text-gray-800">
           Sangam Admin Login
         </h1>
 
-        <form onSubmit={login} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Admin Email
@@ -134,7 +134,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center border-t border-gray-100 pt-4">
           <button
             type="button"
-            onClick={forgotPassword}
+            onClick={handleForgotPassword}
             className="text-sm font-semibold text-orange-600 hover:underline"
           >
             🔑 Forgot Password? Reset Link Bhejo
