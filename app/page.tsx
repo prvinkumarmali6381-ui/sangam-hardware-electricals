@@ -10,12 +10,9 @@ type Product = {
   Category: string;
 };
 
-// Universal Image Parser with Google Drive Auto Direct Stream
+// Google Drive & Web Image Direct Stream Parser
 const getFormattedImageUrl = (rawUrl: string) => {
-  if (!rawUrl || rawUrl.trim() === "") {
-    return "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-  }
-
+  if (!rawUrl || rawUrl.trim() === "") return "";
   const cleanUrl = rawUrl.trim().replace(/\r/g, "");
 
   if (cleanUrl.includes("drive.google.com") || cleanUrl.includes("lh3.googleusercontent.com")) {
@@ -25,9 +22,7 @@ const getFormattedImageUrl = (rawUrl: string) => {
     if (match && match[1]) {
       return `https://lh3.googleusercontent.com/d/${match[1]}=w800`;
     }
-    return cleanUrl;
   }
-
   return cleanUrl;
 };
 
@@ -39,24 +34,9 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
-  const localGallery = [
-    "/images/gallery1.jpeg",
-    "/images/gallery2.jpeg",
-    "/images/gallery3.jpeg",
-    "/images/gallery4.jpeg",
-    "/images/hero.jpg",
-    "/images/shop-front.jpeg",
-    "/images/shop-inside.jpeg",
-  
-  ];
-
-  // Primary Hero Banner: Aapki Shop Front Image + Clean Hardware Images
   const banners = [
-    "/images/shop-front.jpeg", // Aapki Shop Front Image
-    "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80",
-    "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80",
-    "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=1200&q=80"
+    "/images/shop-front.jpeg",
+    "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80"
   ];
 
   const [currentBanner, setCurrentBanner] = useState(0);
@@ -65,11 +45,10 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
     const timer = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, [banners.length]);
 
-  // Safe Google TSV Sheet Fetch
+  // Google Sheet Products Data Fetch
   useEffect(() => {
     const parseTSVData = (text: string) => {
       const rows = text.replace(/\r/g, "").trim().split("\n");
@@ -88,29 +67,17 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCfvoj3QhqSZpO5odJ5ipsBNoU0Uh9PkiBBRvtUlFNzRbrXBnMsoxAdQBCDgx93xZFzXNiIg4jY_bH/pub?gid=0&single=true&output=tsv";
 
     fetch(sheetUrl)
-      .then((res) => {
-        if (!res.ok) throw new Error("Direct TSV Fetch Failed");
-        return res.text();
-      })
+      .then((res) => res.text())
       .then((text) => setProducts(parseTSVData(text)))
-      .catch((err) => {
-        console.warn("Direct TSV fetch blocked, fallback to proxy:", err);
-        fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sheetUrl)}`)
-          .then((res) => res.text())
-          .then((text) => setProducts(parseTSVData(text)))
-          .catch((proxyErr) => console.error("Proxy fetch error:", proxyErr));
-      });
+      .catch((err) => console.error("Sheet Fetch Error:", err));
   }, []);
 
-  // Fetch Gallery Data
+  // ONLY Google Drive Gallery Photos Fetch (Naya Apps Script URL)
   useEffect(() => {
     fetch(
-      "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec"
+      "https://script.google.com/macros/s/AKfycbxC48ot6hUMbSMLDPrmKJCOqzDVEWgXgzZvM6zOQe2k7_cBtjYk06nSOOzgmNKKu4bKTw/exec"
     )
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response error");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setGallery(data);
@@ -118,12 +85,11 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
       })
       .catch((err) => {
         console.warn("Drive Gallery fetch failed:", err);
-        setGallery([]);
       });
   }, []);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-orange-500 selection:text-white">
+    <main className="min-h-screen bg-slate-50 text-slate-800 font-sans">
       {/* TOP ANNOUNCEMENT BAR */}
       <div className="bg-slate-900 text-slate-200 text-xs sm:text-sm py-2.5 px-4 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left">
@@ -172,23 +138,13 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
             </button>
           </div>
         </div>
-
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-6 py-4 flex flex-col gap-4 font-semibold text-slate-700 shadow-lg">
-            <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Home</a>
-            <a href="#products" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Products</a>
-            <a href="#brands" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Brands</a>
-            <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Gallery</a>
-            <a href="#contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-orange-600">Contact</a>
-          </div>
-        )}
       </nav>
 
       {/* HERO BANNER SECTION */}
       <section className="relative h-[65vh] sm:h-[75vh] flex items-center justify-center overflow-hidden bg-slate-900">
         <Image
           src={banners[currentBanner]}
-          alt="Sangam Hardware Store Front"
+          alt="Sangam Hardware Store"
           fill
           priority
           unoptimized={true}
@@ -238,25 +194,21 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-3 tracking-tight">
               Featured Products
             </h2>
-            <p className="text-slate-600 text-base sm:text-lg">
-              Explore authentic hardware, electrical, and paint materials from top brands
-            </p>
           </div>
 
-          {/* Search & Filter Bar */}
           <div className="max-w-3xl mx-auto flex flex-col sm:flex-row gap-4 mb-12 bg-white p-3 rounded-2xl border border-slate-200 shadow-md">
             <input
               type="text"
-              placeholder="🔍 Search Products by name..."
+              placeholder="🔍 Search Products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
+              className="bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
 
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold transition cursor-pointer"
+              className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
             >
               <option value="All">All Categories</option>
               <option value="Hardware">Hardware</option>
@@ -266,7 +218,6 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
             </select>
           </div>
 
-          {/* Product Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products
               .filter((item) => {
@@ -274,7 +225,6 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
                 const matchCategory =
                   category === "All" ||
                   item.Category?.trim().toLowerCase() === category.trim().toLowerCase();
-
                 return matchSearch && matchCategory;
               })
               .map((item, index) => {
@@ -283,35 +233,27 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
                 return (
                   <div
                     key={index}
-                    className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between hover:shadow-xl hover:border-orange-300 transition-all duration-300 group"
+                    className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col justify-between hover:shadow-xl transition duration-300"
                   >
-                    <div className="relative h-64 w-full bg-slate-50 overflow-hidden flex items-center justify-center p-4 border-b border-slate-100">
-                      <img
-                        src={displayImageUrl}
-                        alt={item.Product}
-                        loading="eager"
-                        decoding="async"
-                        referrerPolicy="no-referrer"
-                        className="max-h-full max-w-full object-contain cursor-pointer group-hover:scale-105 transition-transform duration-500"
-                        onClick={() => setSelectedImage(displayImageUrl)}
-                        onError={(e: any) => {
-                          e.target.onerror = null;
-                          if (item.Image && item.Image.startsWith("http")) {
-                            e.target.src = `https://images.weserv.nl/?url=${encodeURIComponent(
-                              item.Image
-                            )}&w=600&output=jpg`;
-                          } else {
-                            e.target.src =
-                              "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-                          }
-                        }}
-                      />
+                    <div className="relative h-64 w-full bg-slate-50 overflow-hidden flex items-center justify-center p-4">
+                      {displayImageUrl ? (
+                        <img
+                          src={displayImageUrl}
+                          alt={item.Product}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          className="max-h-full max-w-full object-contain cursor-pointer"
+                          onClick={() => setSelectedImage(displayImageUrl)}
+                        />
+                      ) : (
+                        <div className="text-slate-400 font-medium">No Image Available</div>
+                      )}
                     </div>
 
-                    <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="p-6 flex-1 flex flex-col justify-between border-t border-slate-100">
                       <div>
                         <div className="flex justify-between items-start gap-2 mb-3">
-                          <h3 className="text-lg font-bold text-slate-900 line-clamp-2 group-hover:text-orange-600 transition">
+                          <h3 className="text-lg font-bold text-slate-900 line-clamp-2">
                             {item.Product}
                           </h3>
                           <span className="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
@@ -339,146 +281,49 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
         </div>
       </section>
 
-      {/* BRANDS SECTION */}
-      <section id="brands" className="py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-center mb-10 text-slate-900">
-            Top Authorized Brands We Offer
-          </h2>
-
-          <div className="flex flex-wrap justify-center gap-4 sm:gap-6">
-            {["Asian Paints", "Havells", "Finolex", "Crompton", "Orbit", "Legrand"].map(
-              (brand) => (
-                <div
-                  key={brand}
-                  className="px-8 py-4 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm font-bold text-base sm:text-lg text-slate-800 hover:border-orange-500 hover:text-orange-600 transition cursor-default"
-                >
-                  {brand}
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* GALLERY SECTION */}
+      {/* GALLERY SECTION (ONLY GOOGLE DRIVE PHOTOS) */}
       <section id="gallery" className="py-16 sm:py-24 bg-slate-100 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-12">
             <h2 className="text-3xl sm:text-5xl font-black text-slate-900 mb-3">
-              Store & Product Gallery
+              Store Gallery
             </h2>
             <p className="text-slate-600 text-sm sm:text-base">
-              Click on any picture to view in high resolution
+              Google Drive Photos ({gallery.length})
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {localGallery.map((img, index) => (
-              <div
-                key={`local-${index}`}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
-              >
-                <img
-                  src={img}
-                  alt={`Gallery Local ${index + 1}`}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
-                  onClick={() => setSelectedImage(img)}
-                  onError={(e: any) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-                  }}
-                />
-              </div>
-            ))}
+          {gallery.length === 0 ? (
+            <div className="text-center py-12 text-slate-500 font-medium">
+              Loading Google Drive Gallery Photos...
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {gallery.map((img: any, index: number) => {
+                const galleryUrl = getFormattedImageUrl(img.url);
 
-            {gallery.map((img: any, index: number) => {
-              const galleryUrl = getFormattedImageUrl(img.url);
-
-              return (
-                <div
-                  key={`drive-${index}`}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
-                >
-                  <img
-                    src={galleryUrl}
-                    alt={img.name || `Gallery Drive ${index + 1}`}
-                    loading="eager"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
-                    onClick={() => setSelectedImage(galleryUrl)}
-                    onError={(e: any) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80";
-                    }}
-                  />
-                </div>
-              );
-            })}
-          </div>
+                return (
+                  <div
+                    key={`drive-${index}`}
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white aspect-square hover:shadow-lg transition duration-300"
+                  >
+                    <img
+                      src={galleryUrl}
+                      alt={img.name || `Gallery ${index + 1}`}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500"
+                      onClick={() => setSelectedImage(galleryUrl)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* CONTACT SECTION */}
-      <section id="contact" className="py-16 sm:py-24 bg-slate-900 text-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl sm:text-5xl font-black mb-6">Contact & Store Location</h2>
-
-          <p className="text-lg sm:text-xl text-slate-300 mb-2">📍 Sangam Hardware & Electricals</p>
-          <p className="text-base text-slate-400 mb-2">🕘 Open All Days: 9:00 AM – 9:00 PM</p>
-          <p className="text-xl font-bold text-amber-400 mb-8">📞 +91 63814 37584, 99441 02488</p>
-
-          <div className="flex justify-center gap-4 flex-wrap">
-            <a
-              href="tel:+916381437584"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
-            >
-              📞 Call Store
-            </a>
-
-            <a
-              href="https://wa.me/916381437584"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-xl font-bold transition shadow-lg"
-            >
-              💬 WhatsApp Us
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* MAP SECTION */}
-      <section className="py-16 bg-white border-t border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-8">
-            Find Us on Google Maps
-          </h2>
-
-          <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-xl mb-6">
-            <iframe
-              src="https://www.google.com/maps?q=Sangam+Hardware+%26+Electricals&output=embed"
-              width="100%"
-              height="400"
-              loading="lazy"
-              className="border-0"
-            ></iframe>
-          </div>
-
-          <a
-            href="https://maps.app.goo.gl/ybjXnehZWDX2ogw67"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl shadow-md transition"
-          >
-            ⭐ View Store Reviews on Google
-          </a>
-        </div>
-      </section>
-
-      {/* FULLSCREEN IMAGE MODAL PREVIEW */}
+      {/* FULLSCREEN PREVIEW */}
       {selectedImage && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
@@ -486,7 +331,7 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
         >
           <img
             src={selectedImage}
-            alt="Product Preview"
+            alt="Preview"
             referrerPolicy="no-referrer"
             className="max-w-full max-h-[90vh] rounded-xl object-contain shadow-2xl"
           />
@@ -499,25 +344,6 @@ const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
           </button>
         </div>
       )}
-
-      {/* FLOATING ACTION BUTTONS */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
-        <a
-          href="https://wa.me/916381437584"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
-        >
-          💬
-        </a>
-
-        <a
-          href="tel:+916381437584"
-          className="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-full shadow-2xl transition flex items-center justify-center text-xl"
-        >
-          📞
-        </a>
-      </div>
     </main>
   );
 }
