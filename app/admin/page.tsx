@@ -20,20 +20,19 @@ export default function AdminPage() {
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Updated Active Google Apps Script Deployment URL
   const SCRIPT_URL =
     "https://script.google.com/macros/s/AKfycbzOH-l4pi_G9CoqiZ7Ah9LkyGP_LP9ob_PyTArLcNIv1DmC9UVC2v2gxUw8IJkETNXFUA/exec";
 
-  // 1. Fetch Products List from Apps Script
+  // Google Sheet Se Products List Fetch Karein
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${SCRIPT_URL}?action=getProducts`);
+      const res = await fetch(SCRIPT_URL);
       const data = await res.json();
       if (Array.isArray(data)) {
         setProducts(data);
       }
     } catch (err) {
-      console.error("Fetch Error:", err);
+      console.error("Sheet Fetch Error:", err);
     }
   };
 
@@ -41,24 +40,21 @@ export default function AdminPage() {
     fetchProducts();
   }, []);
 
-  // 2. Local Base64 Image Preview Logic
+  // Image Selection Handler
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  // 3. Form Submit Handler (Add / Edit)
+  // Submit Handler (Add / Edit)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!product || !price) {
-      alert("Kripya Product Name aur Price dono bharein!");
+      alert("Product Name aur Price bharein!");
       return;
     }
 
@@ -67,22 +63,19 @@ export default function AdminPage() {
     const payload = {
       action: editingRow ? "edit" : "add",
       row: editingRow,
-      product: product,
-      price: price,
-      category: category,
+      product,
+      price,
+      category,
       image: imagePreview || "",
     };
 
     try {
-      const response = await fetch(SCRIPT_URL, {
+      const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
-
-      const resData = await response.json();
+      const resData = await res.json();
 
       if (resData.success) {
         alert(editingRow ? "✅ Product Update Ho Gaya!" : "✅ Naya Product Save Ho Gaya!");
@@ -92,43 +85,36 @@ export default function AdminPage() {
         alert("❌ Error: " + (resData.error || "Unknown Error"));
       }
     } catch (err) {
-      console.error("Upload error:", err);
-      alert("❌ Network Error! Please check internet connection.");
+      alert("❌ Network Error!");
     } finally {
       setLoading(false);
     }
   };
 
-  // 4. Delete Handler
+  // Delete Handler
   const handleDelete = async (row: number) => {
-    if (!confirm("Kya aap sach me is product ko delete karna chahte hain?")) return;
+    if (!confirm("Kya aap is product ko delete karna chahte hain?")) return;
 
     setLoading(true);
     try {
-      const response = await fetch(SCRIPT_URL, {
+      const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify({ action: "delete", row: row }),
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "delete", row }),
       });
-
-      const resData = await response.json();
+      const resData = await res.json();
 
       if (resData.success) {
         alert("🗑️ Product Delete Ho Gaya!");
         fetchProducts();
-      } else {
-        alert("❌ Delete Error: " + resData.error);
       }
     } catch (err) {
-      alert("❌ Delete Nahi Ho Paya!");
+      alert("❌ Delete Error!");
     } finally {
       setLoading(false);
     }
   };
 
-  // 5. Fill Form for Edit
   const startEdit = (item: ProductItem) => {
     setEditingRow(item.row);
     setProduct(item.product);
@@ -155,7 +141,7 @@ export default function AdminPage() {
         </h1>
       </div>
 
-      {/* ADD / EDIT FORM */}
+      {/* FORM: ADD & EDIT */}
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
         <h2 className="text-lg font-bold mb-4 text-gray-800">
           {editingRow ? "✏️ Edit Product Details" : "🚀 Add New Product"}
@@ -220,7 +206,6 @@ export default function AdminPage() {
             />
           </div>
 
-          {/* Photo Preview */}
           {imagePreview && (
             <div className="mt-4 border-2 border-dashed border-orange-300 rounded-xl p-2 bg-orange-50/50 flex flex-col items-center">
               <span className="text-xs font-bold text-orange-600 mb-2">
@@ -260,16 +245,16 @@ export default function AdminPage() {
         </form>
       </div>
 
-      {/* PRODUCTS LIST TABLE WITH EDIT AND DELETE BUTTONS */}
+      {/* GOOGLE SHEET PRODUCTS DATA LIST */}
       <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-200">
         <h2 className="text-lg font-bold mb-4 text-gray-800">
-          All Products ({products.length})
+          All Google Sheet Products ({products.length})
         </h2>
 
         <div className="space-y-3">
           {products.length === 0 ? (
             <p className="text-gray-500 text-center py-4 font-medium">
-              Products load ho rahe hain...
+              Google Sheet se data load ho raha hai...
             </p>
           ) : (
             products.map((item) => (
