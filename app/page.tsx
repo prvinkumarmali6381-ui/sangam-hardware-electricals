@@ -49,10 +49,11 @@ export default function Home() {
     "/images/shop-inside.jpeg",
   ];
 
+  // Pure Hardware & Electrical Tools Background Images (NO PEOPLE / HUMAN FACES)
   const banners = [
-    "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1200&q=80",
-    "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80",
-    "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=1200&q=80",
+    "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80",
+    "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80",
+    "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=1200&q=80",
   ];
 
   const [currentBanner, setCurrentBanner] = useState(0);
@@ -180,7 +181,7 @@ export default function Home() {
         )}
       </nav>
 
-      {/* HERO BANNER SECTION */}
+      {/* HERO BANNER SECTION (TOOL BACKGROUND - NO HUMAN FACES) */}
       <section className="relative h-[65vh] sm:h-[75vh] flex items-center justify-center overflow-hidden bg-slate-900">
         <Image
           src={banners[currentBanner]}
@@ -188,10 +189,10 @@ export default function Home() {
           fill
           priority
           unoptimized={true}
-          className="object-cover opacity-40 scale-105 transition-transform duration-1000"
+          className="object-cover opacity-35 scale-105 transition-transform duration-1000"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
 
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
           <span className="bg-orange-500/20 border border-orange-400/40 text-orange-300 text-xs sm:text-sm font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full inline-block mb-4 backdrop-blur-md">
