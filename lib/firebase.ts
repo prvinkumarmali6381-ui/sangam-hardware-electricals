@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -12,7 +12,8 @@ const firebaseConfig = {
   appId: "1:378628019162:web:a85834f91dea28e41fa6e3",
 };
 
-export const app = initializeApp(firebaseConfig);
+// Safe Initialization for Next.js SSR
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
