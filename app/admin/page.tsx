@@ -8,11 +8,14 @@ export default function PremiumAdminDashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Electrical");
+  const [category, setCategory] = useState("Hardware");
   const [imageBase64, setImageBase64] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
+  // Categories Array
+  const categoriesList = ["Hardware", "Electrical", "Paints", "Plumbing"];
 
   // Sheet Data Fetch
   const fetchProducts = async () => {
@@ -95,7 +98,7 @@ export default function PremiumAdminDashboard() {
     setEditingRow(item.row);
     setProductName(item.product);
     setPrice(item.price);
-    setCategory(item.category || "Electrical");
+    setCategory(item.category || "Hardware");
     setImageBase64(item.image || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -124,10 +127,9 @@ export default function PremiumAdminDashboard() {
     setEditingRow(null);
     setProductName("");
     setPrice("");
-    setCategory("Electrical");
+    setCategory("Hardware");
     setImageBase64("");
   };
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzMcklfjEA2lBgJkHpH9psnRuNMUhOM3KtnpUD6WsbFXCzdAb84ZMu70E-X7pWTz8EwlA/exec";
 
   return (
     <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f8fafc", padding: "30px 20px", fontFamily: "system-ui" }}>
@@ -187,9 +189,11 @@ export default function PremiumAdminDashboard() {
                   onChange={(e) => setCategory(e.target.value)}
                   style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "10px", color: "#fff" }}
                 >
-                  <option value="Electrical">Electrical</option>
-                  <option value="Hardware">Hardware</option>
-                  <option value="Tools">Tools</option>
+                  {categoriesList.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                 </select>
               </div>
 
