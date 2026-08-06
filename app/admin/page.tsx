@@ -1,20 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
 
-// Google Apps Script Deploy Web App URL yahan replace karein
+// Google Apps Script Web App URL yahan paste karein
 const SCRIPT_URL = "AAPKA_NEW_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
-export default function AdminDashboard() {
+export default function PremiumAdminDashboard() {
   const [products, setProducts] = useState<any[]>([]);
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState("Hardware");
+  const [category, setCategory] = useState("Electrical");
   const [imageBase64, setImageBase64] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
-  // 1. Google Sheet se Products Fetch Karein
+  // Sheet Data Fetch
   const fetchProducts = async () => {
+    setFetching(true);
     try {
       const res = await fetch(SCRIPT_URL);
       const data = await res.json();
@@ -22,7 +24,9 @@ export default function AdminDashboard() {
         setProducts(data);
       }
     } catch (err) {
-      console.error("Fetch Error:", err);
+      console.error("Data Fetch Error:", err);
+    } finally {
+      setFetching(false);
     }
   };
 
@@ -30,39 +34,41 @@ export default function AdminDashboard() {
     fetchProducts();
   }, []);
 
-  // 2. Computer se photo select karke Base64 string banana
+  // Computer Photo to Compressed Web-Safe Image Conversion
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageBase64(reader.result as string);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const scaleFactor = MAX_WIDTH / img.width;
+          canvas.width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
+          canvas.height = img.width > MAX_WIDTH ? img.height * scaleFactor : img.height;
+
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          // Image compress and convert to lightweight JPEG
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+          setImageBase64(compressedBase64);
+        };
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // 3. Product Add / Edit Submit Handler
+  // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     const payload = editingRow
-      ? {
-          action: "edit",
-          row: editingRow,
-          product: productName,
-          price: price,
-          category: category,
-          image: imageBase64,
-        }
-      : {
-          action: "add",
-          product: productName,
-          price: price,
-          category: category,
-          image: imageBase64,
-        };
+      ? { action: "edit", row: editingRow, product: productName, price, category, image: imageBase64 }
+      : { action: "add", product: productName, price, category, image: imageBase64 };
 
     try {
       const res = await fetch(SCRIPT_URL, {
@@ -72,47 +78,42 @@ export default function AdminDashboard() {
 
       const data = await res.json();
       if (data.success) {
-        alert(editingRow ? "✅ Product Updated Successfully!" : "✅ Product Saved to Google Sheet!");
+        alert(editingRow ? "✨ Product Updated!" : "🎉 Product Saved & Photo URL Created!");
         resetForm();
         fetchProducts();
       } else {
         alert("❌ Error: " + data.error);
       }
     } catch (err) {
-      console.error(err);
-      alert("❌ Operation Failed");
+      alert("❌ Upload Failed!");
     } finally {
       setLoading(false);
     }
   };
 
-  // 4. Product Edit Trigger
   const handleEdit = (item: any) => {
     setEditingRow(item.row);
     setProductName(item.product);
     setPrice(item.price);
-    setCategory(item.category || "Hardware");
+    setCategory(item.category || "Electrical");
     setImageBase64(item.image || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 5. Product Delete Handler
   const handleDelete = async (row: number) => {
-    if (!confirm("Kya aap is product ko delete karna chahte hain?")) return;
+    if (!confirm("Is product ko delete karna chahte hain?")) return;
     setLoading(true);
-
     try {
       const res = await fetch(SCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify({ action: "delete", row: row }),
+        body: JSON.stringify({ action: "delete", row }),
       });
       const data = await res.json();
       if (data.success) {
-        alert("✅ Product Deleted!");
         fetchProducts();
       }
     } catch (err) {
-      alert("❌ Delete Failed");
+      alert("Delete Error");
     } finally {
       setLoading(false);
     }
@@ -122,117 +123,158 @@ export default function AdminDashboard() {
     setEditingRow(null);
     setProductName("");
     setPrice("");
-    setCategory("Hardware");
+    setCategory("Electrical");
     setImageBase64("");
   };
 
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "20px", fontFamily: "sans-serif" }}>
-      <h2>Sangam Hardware - Product Admin Panel</h2>
-
-      {/* Product Form */}
-      <div style={{ background: "#f8f9fa", padding: "20px", borderRadius: "10px", marginBottom: "30px" }}>
-        <h3>{editingRow ? "✏️ Edit Product Details" : "➕ Add New Product"}</h3>
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "10px" }}>
-            <label>Product Name: </label>
-            <input
-              type="text"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              required
-              style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-            />
+    <div style={{ minHeight: "100vh", background: "#0f172a", color: "#f8fafc", padding: "30px 20px", fontFamily: "system-ui" }}>
+      <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
+        
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: "700", background: "linear-gradient(to right, #38bdf8, #818cf8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Sangam Hardware Pro Admin
+            </h1>
+            <p style={{ color: "#94a3b8", fontSize: "14px", marginTop: "4px" }}>Manage Cloud Products & Google Sheet Sync</p>
           </div>
+          <button onClick={fetchProducts} style={{ background: "#1e293b", border: "1px solid #334155", color: "#e2e8f0", padding: "8px 16px", borderRadius: "8px", cursor: "pointer" }}>
+            🔄 Sync Data
+          </button>
+        </div>
 
-          <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
-            <div style={{ flex: 1 }}>
-              <label>Price (₹): </label>
-              <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-              />
+        {/* Form Card */}
+        <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "16px", padding: "24px", marginBottom: "40px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.3)" }}>
+          <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#38bdf8", marginBottom: "20px" }}>
+            {editingRow ? "✏️ Edit Product Entry" : "➕ Add New Cloud Product"}
+          </h2>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#cbd5e1", marginBottom: "6px" }}>Product Name</label>
+                <input
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  placeholder="e.g. Table Fan Crompton"
+                  required
+                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "10px", color: "#fff" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#cbd5e1", marginBottom: "6px" }}>Price (₹)</label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="3450"
+                  required
+                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "10px", color: "#fff" }}
+                />
+              </div>
             </div>
-            <div style={{ flex: 1 }}>
-              <label>Category: </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-              >
-                <option value="Hardware">Hardware</option>
-                <option value="Electrical">Electrical</option>
-              </select>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#cbd5e1", marginBottom: "6px" }}>Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "10px", color: "#fff" }}
+                >
+                  <option value="Electrical">Electrical</option>
+                  <option value="Hardware">Hardware</option>
+                  <option value="Tools">Tools</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", color: "#cbd5e1", marginBottom: "6px" }}>Upload Computer Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "7px", color: "#cbd5e1", fontSize: "13px" }}
+                />
+              </div>
             </div>
-          </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Computer se Photo Select Karein: </label>
-            <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginTop: "5px" }} />
-          </div>
-
-          {imageBase64 && (
-            <div style={{ marginBottom: "15px" }}>
-              <p>Selected Photo Preview:</p>
-              <img src={imageBase64} alt="Preview" style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px" }} />
-            </div>
-          )}
-
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                padding: "10px 20px",
-                background: editingRow ? "#28a745" : "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              {loading ? "⏳ Processing..." : editingRow ? "Update Product" : "Save Product"}
-            </button>
-            {editingRow && (
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{ padding: "10px 20px", background: "#6c757d", color: "#fff", border: "none", borderRadius: "5px" }}
-              >
-                Cancel
-              </button>
+            {/* Photo Preview */}
+            {imageBase64 && (
+              <div style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "15px", background: "#0f172a", padding: "12px", borderRadius: "10px", border: "1px dashed #38bdf8" }}>
+                <img src={imageBase64} alt="Preview" style={{ width: "60px", height: "60px", objectFit: "contain", borderRadius: "6px" }} />
+                <span style={{ fontSize: "13px", color: "#38bdf8" }}>✓ Image Processed & Optimized for Sheet URL</span>
+              </div>
             )}
-          </div>
-        </form>
-      </div>
 
-      {/* Google Sheet Products Display Table/Grid */}
-      <h3>All Google Sheet Products ({products.length})</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-        {products.map((item) => (
-          <div key={item.row} style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "15px", textAlign: "center", background: "#fff" }}>
-            <img
-              src={item.image || "https://via.placeholder.com/150"}
-              alt={item.product}
-              style={{ width: "100%", height: "140px", objectFit: "contain", marginBottom: "10px" }}
-            />
-            <h4 style={{ margin: "5px 0" }}>{item.product}</h4>
-            <p style={{ margin: "5px 0", color: "#28a745", fontWeight: "bold" }}>₹{item.price}</p>
-            <p style={{ margin: "5px 0", fontSize: "12px", color: "#6c757d" }}>Category: {item.category}</p>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  background: "linear-gradient(to right, #0284c7, #2563eb)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 24px",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                {loading ? "⏳ Uploading & Saving URL..." : editingRow ? "Update Product" : "Save Product"}
+              </button>
 
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px" }}>
-              <button onClick={() => handleEdit(item)} style={{ padding: "5px 10px", background: "#ffc107", border: "none", borderRadius: "4px" }}>
-                ✏️ Edit
-              </button>
-              <button onClick={() => handleDelete(item.row)} style={{ padding: "5px 10px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}>
-                🗑️ Delete
-              </button>
+              {editingRow && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  style={{ background: "#334155", color: "#fff", border: "none", padding: "10px 20px", borderRadius: "8px", cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
+          </form>
+        </div>
+
+        {/* Product Grid */}
+        <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "20px", color: "#e2e8f0" }}>
+          Live Google Sheet Products ({products.length})
+        </h3>
+
+        {fetching ? (
+          <p style={{ color: "#94a3b8" }}>Loading live products...</p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
+            {products.map((item) => (
+              <div key={item.row} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "12px", padding: "16px", textAlign: "center" }}>
+                <div style={{ height: "140px", background: "#0f172a", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "12px", padding: "8px" }}>
+                  <img
+                    src={item.image || "https://via.placeholder.com/150"}
+                    alt={item.product}
+                    style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
+                  />
+                </div>
+                <h4 style={{ fontSize: "15px", fontWeight: "600", margin: "0 0 6px 0", color: "#f8fafc" }}>{item.product}</h4>
+                <p style={{ fontSize: "16px", fontWeight: "700", color: "#38bdf8", margin: "0 0 4px 0" }}>₹{item.price}</p>
+                <span style={{ fontSize: "11px", background: "#0f172a", color: "#94a3b8", padding: "3px 8px", borderRadius: "12px" }}>{item.category}</span>
+
+                <div style={{ display: "flex", gap: "8px", marginTop: "14px" }}>
+                  <button onClick={() => handleEdit(item)} style={{ flex: 1, background: "#0284c7", color: "#fff", border: "none", padding: "6px", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(item.row)} style={{ flex: 1, background: "#ef4444", color: "#fff", border: "none", padding: "6px", borderRadius: "6px", fontSize: "12px", cursor: "pointer" }}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+
       </div>
     </div>
   );
