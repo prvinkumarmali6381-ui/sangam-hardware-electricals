@@ -39,6 +39,7 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+const GALLERY_FOLDER_ID = "1yyhRTw7wNdCaytIiLEz-ryxu4Hz3hQ4B";
   const localGallery = [
     "/images/gallery1.jpeg",
     "/images/gallery2.jpeg",
@@ -47,6 +48,7 @@ export default function Home() {
     "/images/hero.jpg",
     "/images/shop-front.jpeg",
     "/images/shop-inside.jpeg",
+  
   ];
 
   // Primary Hero Banner: Aapki Shop Front Image + Clean Hardware Images
