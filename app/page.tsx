@@ -34,9 +34,13 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Hero Banner Slider with 5 Actual Shop Photos
   const banners = [
+    "/images/hero.jpg",
     "/images/shop-front.jpeg",
-    "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&q=80"
+    "/images/shop-inside.jpeg",
+    "/images/gallery3.jpeg",
+    "/images/gallery4.jpeg"
   ];
 
   const [currentBanner, setCurrentBanner] = useState(0);
@@ -150,15 +154,15 @@ export default function Home() {
         )}
       </nav>
 
-      {/* HERO BANNER SECTION */}
+      {/* HERO BANNER SECTION WITH 5 SHOP PHOTOS */}
       <section className="relative h-[65vh] sm:h-[75vh] flex items-center justify-center overflow-hidden bg-slate-900">
         <Image
           src={banners[currentBanner]}
-          alt="Sangam Hardware Store"
+          alt="Sangam Hardware Store View"
           fill
           priority
           unoptimized={true}
-          className="object-cover opacity-45 scale-105 transition-transform duration-1000"
+          className="object-cover opacity-50 scale-105 transition-all duration-1000"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent" />
