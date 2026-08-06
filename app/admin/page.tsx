@@ -21,7 +21,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
 
   const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbzR61KAFLt8329jqzRfjuNB8LXOxNsvLQyyUm8Q7ZWpd6348ZA9EDBAnDL8-kY5YeTBEA/exec";
+    "https://script.google.com/macros/s/AKfycbzMcklfjEA2lBgJkHpH9psnRuNMUhOM3KtnpUD6WsbFXCzdAb84ZMu70E-X7pWTz8EwlA/exec";
 
   // Google Sheet Se Products List Fetch Karein
   const fetchProducts = async () => {
