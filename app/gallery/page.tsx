@@ -24,7 +24,7 @@ export default function GalleryPage() {
 
   // Naya Updated Apps Script Deployment URL
   const SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbzn7YjQTVnD1hN5-y1BsEsUDzofnTdxx3W5PHFAdj-HE45odmdfuoo9zfO7okVDHlACng/exec";
+    "https://script.google.com/macros/s/AKfycbwsjoWwffW6zq66cnfxq4k1VuehsItAOJ2zi6KVf5UyGSeLyxqUBusMKSqS_sS_Cypftw/exec";
 
   useEffect(() => {
     fetch(SCRIPT_URL)
